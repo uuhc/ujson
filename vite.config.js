@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,6 +50,23 @@ function copyExtensionFiles() {
             copyFileSync(iconPath, resolve(distIconsDir, icon));
           }
         });
+
+        // 复制 _locales 目录
+        const localesDir = resolve(__dirname, '_locales');
+        if (existsSync(localesDir)) {
+          const locales = readdirSync(localesDir);
+          locales.forEach(locale => {
+            const localeSrcDir = resolve(localesDir, locale);
+            const localeDistDir = resolve(distDir, '_locales', locale);
+            if (!existsSync(localeDistDir)) {
+              mkdirSync(localeDistDir, { recursive: true });
+            }
+            const messagesFile = resolve(localeSrcDir, 'messages.json');
+            if (existsSync(messagesFile)) {
+              copyFileSync(messagesFile, resolve(localeDistDir, 'messages.json'));
+            }
+          });
+        }
       } catch (error) {
         console.error('复制文件失败:', error);
       }

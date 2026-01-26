@@ -45,6 +45,13 @@
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
         </button>
+        <button class="toolbar-btn" @click="downloadJson" title="下载 JSON">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
         <button class="toolbar-btn" @click="openInEditor" title="在编辑器中打开">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -196,6 +203,29 @@ async function copyJson() {
     }
   } catch (e) {
     showToast('复制失败', 'error')
+  }
+}
+
+// 下载 JSON 文件
+function downloadJson() {
+  if (!jsonContent.value) {
+    showToast('没有可下载的内容', 'error')
+    return
+  }
+  
+  try {
+    const blob = new Blob([jsonContent.value], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `data_${Date.now()}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    showToast('下载成功')
+  } catch (e) {
+    showToast('下载失败', 'error')
   }
 }
 

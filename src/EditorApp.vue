@@ -55,6 +55,7 @@
         <button class="format-btn" @click="escapeJson">转义</button>
         <button class="format-btn" @click="unescapeJson">反转义</button>
         <button class="format-btn" @click="copyOutput" :disabled="!outputJson">复制结果</button>
+        <button class="format-btn" @click="downloadJson" :disabled="!outputJson">下载</button>
       </div>
       <div class="toolbar-right">
         <span class="toolbar-label">格式化结果</span>
@@ -92,6 +93,14 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <!-- 下载 -->
+        <button class="action-btn" @click="downloadJson" :disabled="!outputJson" title="下载">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
         </button>
       </div>
@@ -311,6 +320,26 @@ async function copyOutput() {
     showToast('已复制到剪贴板')
   } else {
     showToast('复制失败', 'error')
+  }
+}
+
+// 下载 JSON 文件
+function downloadJson() {
+  if (!outputJson.value) return
+  
+  try {
+    const blob = new Blob([outputJson.value], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `data_${Date.now()}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    showToast('下载成功')
+  } catch (e) {
+    showToast('下载失败', 'error')
   }
 }
 

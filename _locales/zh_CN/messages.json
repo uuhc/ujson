@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "uJson - JSON 格式化工具",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "自动格式化 JSON 响应，支持语法高亮、可折叠树形视图、深色模式和内置编辑器",
+    "description": "Extension description"
+  }
+}

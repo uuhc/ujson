@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "uJson - JSON Formatter & Viewer",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Auto-format JSON responses with syntax highlighting, collapsible tree view, dark mode & built-in editor",
+    "description": "Extension description"
+  }
+}
