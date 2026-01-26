@@ -30,15 +30,14 @@
 
 ## 📸 Screenshots
 
-| Auto Format                   | Editor                            | Dark Mode                     |
-| ----------------------------- | --------------------------------- | ----------------------------- |
-| ![Auto](screenshots/auto.png) | ![Editor](screenshots/editor.png) | ![Dark](screenshots/dark.png) |
+| Viewer                                | Editor                                | Dark Mode                           |
+| ------------------------------------- | ------------------------------------- | ----------------------------------- |
+| ![Viewer](screenshots/1280-800-0.png) | ![Editor](screenshots/1280-800-4.png) | ![Dark](screenshots/1280-800-1.png) |
 
 ## 📦 Installation
 
 ### Chrome Web Store
 
-Coming soon...
 
 ### Manual Installation
 
@@ -128,6 +127,10 @@ ujson/
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+## 🔒 Privacy
+
+This extension does not collect any user data. See [Privacy Policy](PRIVACY.md) for details.
 
 ## 🤝 Contributing
 
