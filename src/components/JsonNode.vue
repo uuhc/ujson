@@ -3,8 +3,31 @@
         <div 
             class="json-line" 
             :style="{ paddingLeft: (level * 4 + 6) + 'ch' }" 
+            @mouseenter="isHovered = true" 
+            @mouseleave="isHovered = false"
         >
             <span class="line-number">{{ currentLineNumber }}</span>
+            <!-- 删除按钮容器 -->
+            <span 
+                v-if="editable && key !== null && level > 0" 
+                class="json-delete-container"
+            >
+                <span 
+                    v-if="isHovered" 
+                    class="json-delete"
+                    @click.stop="handleDelete"
+                    title="删除此项"
+                >
+                    <svg 
+                        viewBox="0 0 16 16"
+                        width="14"
+                        height="14"
+                        class="delete-icon"
+                    >
+                        <path d="M4 4 L12 12 M12 4 L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                </span>
+            </span>
             <span 
                 v-if="isObject || isArray" 
                 class="json-toggle"
@@ -79,7 +102,9 @@
                         :collapsed-version="collapsedVersion"
                         :line-numbers="lineNumbers"
                         :is-last="index === Object.keys(data).length - 1"
+                        :editable="editable"
                         @toggle="$emit('toggle', $event)"
+                        @delete="$emit('delete', $event)"
                     />
                 </template>
                 <div 
@@ -87,6 +112,7 @@
                     :style="{ paddingLeft: (level * 4 + 6) + 'ch' }"
                 >
                     <span class="line-number">{{ closeLineNumber }}</span>
+                    <span v-if="editable && key !== null && level > 0" class="json-delete-container-placeholder"></span>
                     <span class="json-toggle-placeholder"></span>
                     <span class="json-brace json-brace-close">}</span>
                     <span v-if="!isLast" class="json-comma">,</span>
@@ -105,7 +131,9 @@
                         :line-numbers="lineNumbers"
                         :is-last="index === data.length - 1"
                         :is-array-item="true"
+                        :editable="editable"
                         @toggle="$emit('toggle', $event)"
+                        @delete="$emit('delete', $event)"
                     />
                 </template>
                 <div 
@@ -113,6 +141,7 @@
                     :style="{ paddingLeft: (level * 4 + 6) + 'ch' }"
                 >
                     <span class="line-number">{{ closeLineNumber }}</span>
+                    <span v-if="editable && key !== null && level > 0" class="json-delete-container-placeholder"></span>
                     <span class="json-toggle-placeholder"></span>
                     <span class="json-bracket json-bracket-close">]</span>
                     <span v-if="!isLast" class="json-comma">,</span>
@@ -123,7 +152,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import JsonValue from './JsonValue.vue'
 
 const props = defineProps({
@@ -161,10 +190,16 @@ const props = defineProps({
     isArrayItem: {
         type: Boolean,
         default: false
+    },
+    editable: {
+        type: Boolean,
+        default: false
     }
 })
 
-const emit = defineEmits(['toggle'])
+const emit = defineEmits(['toggle', 'delete'])
+
+const isHovered = ref(false)
 
 const key = computed(() => props.keyName)
 const isObject = computed(() => typeof props.data === 'object' && props.data !== null && !Array.isArray(props.data))
@@ -197,6 +232,10 @@ const closeLineNumber = computed(() => {
 
 const handleToggle = () => {
     emit('toggle', props.path)
+}
+
+const handleDelete = () => {
+    emit('delete', props.path)
 }
 </script>
 
@@ -255,6 +294,47 @@ const handleToggle = () => {
 
 .json-toggle-placeholder {
     width: 2ch;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.json-delete-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-right: 0;
+}
+
+.json-delete-container-placeholder {
+    display: inline-block;
+    width: 20px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-right: 0;
+}
+
+.json-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    color: var(--error-color, #ff4d4f);
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+    flex-shrink: 0;
+}
+
+.json-delete:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.delete-icon {
     display: inline-block;
     flex-shrink: 0;
 }

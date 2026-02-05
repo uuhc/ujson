@@ -10,7 +10,9 @@
                 :collapsed-version="collapsedPathsVersion"
                 :line-numbers="lineNumbers"
                 :is-last="true"
+                :editable="editable"
                 @toggle="handleToggle"
+                @delete="handleDelete"
             />
         </div>
         <div v-else class="json-error">
@@ -54,6 +56,10 @@ const props = defineProps({
     defaultExpandLevel: {
         type: Number,
         default: 2
+    },
+    editable: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -162,6 +168,125 @@ const handleToggle = (path) => {
     }
     collapsedPaths.value = new Set(collapsedPaths.value)
     collapsedPathsVersion.value++
+}
+
+// 根据 path 删除 JSON 中的对应项
+const handleDelete = (path) => {
+    if (!parsedData.value || !path) {
+        return
+    }
+
+    try {
+        // 解析 path，例如 ".data.onebox" 或 ".data.items[0]"
+        const pathParts = path.split('.').filter(p => p)
+        
+        // 处理数组索引
+        const parsePathPart = (part) => {
+            const arrayMatch = part.match(/^(.+)\[(\d+)\]$/)
+            if (arrayMatch) {
+                return {
+                    key: arrayMatch[1],
+                    arrayIndex: parseInt(arrayMatch[2])
+                }
+            }
+            // 检查是否是纯数组索引 [0]
+            const pureArrayMatch = part.match(/^\[(\d+)\]$/)
+            if (pureArrayMatch) {
+                return {
+                    arrayIndex: parseInt(pureArrayMatch[1])
+                }
+            }
+            return { key: part }
+        }
+
+        // 找到要删除的项的父对象和 key/index
+        let current = parsedData.value
+        let parent = null
+        let deleteKey = null
+        let deleteIndex = null
+
+        if (pathParts.length === 0) {
+            // 根路径，不能删除根
+            return
+        }
+
+        // 遍历路径找到父对象
+        for (let i = 0; i < pathParts.length - 1; i++) {
+            const part = parsePathPart(pathParts[i])
+            if (part.arrayIndex !== undefined && part.key === undefined) {
+                // 纯数组索引
+                if (Array.isArray(current)) {
+                    parent = current
+                    current = current[part.arrayIndex]
+                } else {
+                    return
+                }
+            } else if (part.arrayIndex !== undefined) {
+                // 带key的数组项
+                if (current && typeof current === 'object' && current[part.key]) {
+                    current = current[part.key]
+                    if (Array.isArray(current)) {
+                        parent = current
+                        current = current[part.arrayIndex]
+                    }
+                } else {
+                    return
+                }
+            } else {
+                // 对象属性
+                if (current && typeof current === 'object' && !Array.isArray(current) && current[part.key] !== undefined) {
+                    parent = current
+                    current = current[part.key]
+                } else {
+                    return
+                }
+            }
+        }
+
+        // 处理最后一个路径部分（要删除的项）
+        const lastPart = parsePathPart(pathParts[pathParts.length - 1])
+        if (lastPart.arrayIndex !== undefined && lastPart.key === undefined) {
+            // 纯数组索引删除
+            if (Array.isArray(current)) {
+                parent = current
+                deleteIndex = lastPart.arrayIndex
+            } else {
+                return
+            }
+        } else if (lastPart.arrayIndex !== undefined) {
+            // 带key的数组项
+            if (current && typeof current === 'object' && !Array.isArray(current) && Array.isArray(current[lastPart.key])) {
+                parent = current[lastPart.key]
+                deleteIndex = lastPart.arrayIndex
+            } else {
+                return
+            }
+        } else {
+            // 删除对象属性
+            if (current && typeof current === 'object' && !Array.isArray(current)) {
+                parent = current
+                deleteKey = lastPart.key
+            } else {
+                return
+            }
+        }
+
+        // 执行删除
+        if (deleteKey !== null && parent && typeof parent === 'object' && !Array.isArray(parent)) {
+            delete parent[deleteKey]
+        } else if (deleteIndex !== null && Array.isArray(parent)) {
+            parent.splice(deleteIndex, 1)
+        } else {
+            return
+        }
+
+        // 重新计算行号并更新视图
+        lineNumbers.value = calculateLineNumbers(parsedData.value)
+        maxDepth.value = calculateMaxDepth(parsedData.value)
+        collapsedPathsVersion.value++
+    } catch (e) {
+        console.error('删除失败:', e)
+    }
 }
 
 // 处理滚动事件
