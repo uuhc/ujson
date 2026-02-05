@@ -49,7 +49,6 @@
       <div class="toolbar-center">
         <button class="format-btn" :class="{ active: viewMode === 'tree' }" @click="formatJson">
           格式化
-          <span class="shortcut">⌘F</span>
         </button>
         <button class="format-btn" :class="{ active: viewMode === 'raw' }" @click="compressJson">压缩</button>
         <button class="format-btn" @click="escapeJson">转义</button>
@@ -169,7 +168,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import JsonViewer from './components/JsonViewer.vue'
 import { formatJson as formatJsonUtil, compressJson as compressJsonUtil, escapeJson as escapeJsonUtil, unescapeJson as unescapeJsonUtil, tryParseJson } from './utils/jsonFormat'
 
@@ -436,13 +435,6 @@ function startResize(e) {
   document.addEventListener('mouseup', onMouseUp)
 }
 
-// 快捷键
-function handleKeydown(e) {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
-    e.preventDefault()
-    formatJson()
-  }
-}
 
 // 加载保存的内容
 async function loadSavedContent() {
@@ -458,11 +450,6 @@ async function loadSavedContent() {
 
 onMounted(() => {
   loadSavedContent()
-  window.addEventListener('keydown', handleKeydown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
 })
 </script>
 

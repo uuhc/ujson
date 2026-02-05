@@ -71,10 +71,6 @@ Simply visit any URL that returns JSON data - the extension will automatically d
 | 📋      | Copy to clipboard         |
 | 🌙/☀️    | Toggle theme              |
 
-### Keyboard Shortcuts
-
-- `⌘/Ctrl + F` - Format JSON
-
 ## 🛠 Development
 
 ### Prerequisites
