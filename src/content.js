@@ -8,67 +8,82 @@
   }
   window.__ujson_injected__ = true;
 
-  // 检测页面内容是否是 JSON
+  // 检查字符串是否是有效的 JSON
+  function isValidJsonString(str) {
+    if (!str || typeof str !== 'string') return false;
+
+    const trimmed = str.trim();
+
+    // 必须以 { 或 [ 开头
+    if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+      return false;
+    }
+
+    // 必须以 } 或 ] 结尾（对称匹配）
+    if (!trimmed.endsWith('}') && !trimmed.endsWith(']')) {
+      return false;
+    }
+
+    // 尝试解析
+    try {
+      const parsed = JSON.parse(trimmed);
+      // 必须是对象或数组
+      return typeof parsed === 'object' && parsed !== null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 检测页面内容是否是 JSON（统一入口）
   function detectJson() {
-    // 获取页面内容
+    const body = document.body;
+    if (!body) return null;
+
+    // 获取页面的纯文本内容
+    const bodyText = (body.innerText || '').trim();
+    if (!bodyText) return null;
+
     let content = '';
-    
-    // 方式1: 检查 <pre> 标签（浏览器通常把 JSON 放在 pre 里）
+    let isValidJson = false;
+
+    // 策略：检查页面的核心内容是否是一个有效的 JSON
+
+    // 优先检查 pre 标签（浏览器通常把 JSON 响应放在 pre 里）
     const preElement = document.querySelector('pre');
     if (preElement) {
-      content = preElement.textContent || '';
+      const preText = (preElement.textContent || '').trim();
+
+      // 检查 pre 内容是否构成有效 JSON
+      if (preText && isValidJsonString(preText)) {
+        // pre 内容是有效的 JSON，检查它是否是页面的主要部分
+        const ratio = preText.length / bodyText.length;
+
+        // pre 内容至少占页面内容的 80%
+        if (ratio >= 0.8) {
+          content = preText;
+          isValidJson = true;
+        }
+      }
     }
-    
-    // 方式2: 如果没有 pre，检查 body 的纯文本内容
-    if (!content) {
-      content = document.body?.innerText || '';
+
+    // 如果 pre 标签不是主要部分，检查整个页面
+    if (!content && isValidJsonString(bodyText)) {
+      content = bodyText;
+      isValidJson = true;
     }
-    
-    // 清理内容
-    content = content.trim();
-    
-    // 检查是否是有效 JSON
-    if (!content) return null;
-    
-    // 必须以 { 或 [ 开头
-    if (!content.startsWith('{') && !content.startsWith('[')) {
+
+    // 如果没有找到有效 JSON，返回 null
+    if (!content || !isValidJson) {
       return null;
     }
-    
+
+    // 解析 JSON
     try {
       const parsed = JSON.parse(content);
-      // 确保是对象或数组
-      if (typeof parsed === 'object' && parsed !== null) {
-        return { content, parsed };
-      }
+      return { content, parsed };
     } catch (e) {
-      // 不是有效的 JSON
+      return null;
     }
-    
-    return null;
-  }
-
-  // 检查 URL 是否可能是 JSON
-  function isLikelyJsonUrl() {
-    const url = window.location.href.toLowerCase();
-    // .json 文件
-    if (url.endsWith('.json')) return true;
-    // API 接口常见模式
-    if (url.includes('/api/') || url.includes('/json')) return true;
-    return false;
-  }
-
-  // 检查 Content-Type（通过 meta 或其他方式）
-  function checkContentType() {
-    // 检查是否有 JSON 相关的 Content-Type
-    // 注意：Content-Type 头部无法直接在 content script 中获取
-    // 但我们可以通过页面特征来判断
-    const contentTypeTag = document.querySelector('meta[http-equiv="content-type"]');
-    if (contentTypeTag) {
-      const content = contentTypeTag.getAttribute('content') || '';
-      if (content.includes('application/json')) return true;
-    }
-    return false;
   }
 
   // 创建格式化视图

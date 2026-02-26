@@ -10,6 +10,7 @@
 
 <p align="center">
   <a href="#features">Features</a> •
+  <a href="#screenshots">Screenshots</a> •
   <a href="#installation">Installation</a> •
   <a href="#usage">Usage</a> •
   <a href="#development">Development</a>
@@ -41,6 +42,10 @@
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/nahpjpifcdnkjcfoikglibgikhnkachl)](https://chromewebstore.google.com/detail/ujson-json-formatter-view/nahpjpifcdnkjcfoikglibgikhnkachl)
 
 👉 [Install from Chrome Web Store](https://chromewebstore.google.com/detail/ujson-json-formatter-view/nahpjpifcdnkjcfoikglibgikhnkachl)
+
+### Microsoft Edge Add-ons
+
+👉 [Install from Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/ujson-json-formatter-/pokklogccaldkkmglmcoencijedeoeff)
 
 ### Manual Installation
 
